@@ -8,130 +8,130 @@ public class Main {
 	public static void main(String[] args) {
 		Scanner input = new Scanner(System.in);
 		
-		float saldo = 1000.00f;
-		float monto;
+		float balance = 1000.00f;
+		float amount;
 		int id = 1;
-		Operacion operacion;
+		Operation operation;
 		
-		// Lista para el historial, Queue para pendientes y Pila para guardar las operaciones procesadas y deshacer la ultima.
-		ArrayList<Operacion> historial = new ArrayList<Operacion>();
-		Queue<Operacion> pendientes = new ArrayDeque<Operacion>();
-		Deque<Operacion> procesadas = new ArrayDeque<Operacion>();
+		// List for history, Queue for pending operations, and Stack to save processed operations and undo the last one.
+		ArrayList<Operation> history = new ArrayList<Operation>();
+		Queue<Operation> pending = new ArrayDeque<Operation>();
+		Deque<Operation> processed = new ArrayDeque<Operation>();
 		
-		int opcion;
+		int option;
 		
 		do {
 			System.out.println("\n---------------------------");
-			System.out.println("|| OPERACIONES BANCARIAS ||");
+			System.out.println("|| BANKING OPERATIONS ||");
 			System.out.println("---------------------------");
-			System.out.println("1. Registrar deposito.");
-			System.out.println("2. Registrar retiro.");
-			System.out.println("3. Procesar operacion pendiente.");
-			System.out.println("4. Consultar operaciones pendientes.");
-			System.out.println("5. Historial de operaciones.");
-			System.out.println("6. Consultar saldo.");
-			System.out.println("7. Deshacer ultima operacion procesada.");
-			System.out.println("0. Salir.");
+			System.out.println("1. Register deposit.");
+			System.out.println("2. Register withdrawal.");
+			System.out.println("3. Process pending operation.");
+			System.out.println("4. View pending operations.");
+			System.out.println("5. Operation history.");
+			System.out.println("6. Check balance.");
+			System.out.println("7. Undo last processed operation.");
+			System.out.println("0. Exit.");
 			
-			System.out.print("\n- Seleccione una opcion: ");
-			opcion = input.nextInt();
+			System.out.print("\n- Select an option: ");
+			option = input.nextInt();
 			
-			switch (opcion) {
+			switch (option) {
 				case 1:
-					System.out.print("\nMonto a depositar: ");
-					monto = input.nextFloat();
+					System.out.print("\nAmount to deposit: ");
+					amount = input.nextFloat();
 					
-					operacion = new Operacion(id++, "Deposito.", monto, "Pendiente.");
-					pendientes.offer(operacion);
-					historial.add(operacion);
+					operation = new Operation(id++, "Deposit.", amount, "Pending.");
+					pending.offer(operation);
+					history.add(operation);
 					
 					break;
 				case 2:
-					System.out.print("\nMonto a retirar: ");
-					monto = input.nextFloat();
+					System.out.print("\nAmount to withdraw: ");
+					amount = input.nextFloat();
 					
-					operacion = new Operacion(id++, "Retiro.", monto, "Pendiente.");
-					pendientes.offer(operacion);
-					historial.add(operacion);
+					operation = new Operation(id++, "Withdrawal.", amount, "Pending.");
+					pending.offer(operation);
+					history.add(operation);
 					
 					break;
 				case 3:
-					if (pendientes.isEmpty()) {
-						System.out.println("\nNo hay operaciones para procesar.");
+					if (pending.isEmpty()) {
+						System.out.println("\nNo operations to process.");
 					} else {
-						operacion = pendientes.poll(); 	// Retira de pendientes la primera operacion.
+						operation = pending.poll(); 	// Removes the first operation from pending.
 						
-						/* En caso de que sea un deposito, se agrega el monto de la operacion al saldo y se anade
-						 * la operacion al tope del stack. Funciona de la misma manera en un retiro, solo que necesita
-						 * verificar que el saldo sea mayor o igual al monto, para que en caso de que la condicion no se 
-						 * cumpla la operacion quedara como rechazada, por eso no se mete al stack de procesadas.
+						/* If it is a deposit, the operation amount is added to the balance and
+- the operation is added to the top of the stack. It works the same way for a withdrawal, except it needs
+- to verify that the balance is greater than or equal to the amount, so that if the condition is not
+- met, the operation will be marked as rejected, which is why it is not pushed to the processed stack.
 						 */
-						if (operacion.getTipo().equalsIgnoreCase("Deposito.")) {
-							saldo += operacion.getMonto();
-							operacion.setEstado("Procesada.");
-							procesadas.push(operacion);
-							System.out.printf("\nID de la operacion: %d\n", operacion.getID());
-						} else if (operacion.getTipo().equalsIgnoreCase("Retiro.")) {
-							if (saldo >= operacion.getMonto()) {
-								saldo -= operacion.getMonto();
-								operacion.setEstado("Procesada.");
-								procesadas.push(operacion);
-								System.out.printf("\nID de la operacion: %d\n", operacion.getID());
+						if (operation.getType().equalsIgnoreCase("Deposit.")) {
+							balance += operation.getAmount();
+							operation.setStatus("Processed.");
+							processed.push(operation);
+							System.out.printf("\nOperation ID: %d\n", operation.getID());
+						} else if (operation.getType().equalsIgnoreCase("Withdrawal.")) {
+							if (balance >= operation.getAmount()) {
+								balance -= operation.getAmount();
+								operation.setStatus("Processed.");
+								processed.push(operation);
+								System.out.printf("\nOperation ID: %d\n", operation.getID());
 							} else {
-								operacion.setEstado("Rechazada.");
-								System.out.printf("\nID de la operacion: %d - FONDOS INSUFICIENTES.\n", operacion.getID());
+								operation.setStatus("Rejected.");
+								System.out.printf("\nOperation ID: %d - INSUFFICIENT FUNDS.\n", operation.getID());
 							}
 						}
 					}
 					
 					break;
 				case 4:
-					if(pendientes.isEmpty()) {
-						System.out.println("\nNo hay operaciones pendientes.");
+					if(pending.isEmpty()) {
+						System.out.println("\nNo pending operations.");
 					} else {
-						for(Operacion op : pendientes) {
+						for(Operation op : pending) {
 							System.out.println(op);
 						}
 					}
 					
 					break;
 				case 5:
-					if(historial.isEmpty()) {
-						System.out.println("\nNo se han realizado operaciones.");
+					if(history.isEmpty()) {
+						System.out.println("\nNo operations have been performed.");
 					} else {
-						for(Operacion op : historial) {
+						for(Operation op : history) {
 							System.out.println(op);
 						}
 					}
 					break;
 				case 6:
-					System.out.printf("\nSaldo disponible: %.2f\n", saldo);
+					System.out.printf("\nAvailable balance: %.2f\n", balance);
 					break;
 				case 7:
-					if (procesadas.isEmpty()) {
-						System.out.println("\nNo hay operaciones para deshacer.");
+					if (processed.isEmpty()) {
+						System.out.println("\nNo operations to undo.");
 					} else {
-						/* Utilizamos la funcion peek de las pilas para checar el tipo de la ultima operacion
-						 * procesada, dependiendo de cual tipo sea se retira o se devuelve el monto al saldo.
+						/* We use the peek function of stacks to check the type of the last
+- processed operation; depending on which type it is, the amount is subtracted from or returned to the balance.
 						 */
-						if (procesadas.peek().getTipo().equalsIgnoreCase("Deposito.")) {
-							saldo -= procesadas.peek().getMonto();
-						} else if (procesadas.peek().getTipo().equalsIgnoreCase("Retiro.")) {
-							saldo += procesadas.peek().getMonto();
+						if (processed.peek().getType().equalsIgnoreCase("Deposit.")) {
+							balance -= processed.peek().getAmount();
+						} else if (processed.peek().getType().equalsIgnoreCase("Withdrawal.")) {
+							balance += processed.peek().getAmount();
 						}
-						procesadas.peek().setEstado("Deshecha");
-						System.out.printf("\nID de la operacion: %d\n", procesadas.peek().getID());
-						procesadas.pop(); // Se saca la operacion deshecha de la pila para que no interfiera con las demas operaciones procesadas.
+						processed.peek().setStatus("Undone");
+						System.out.printf("\nOperation ID: %d\n", processed.peek().getID());
+						processed.pop(); // Removes the undone operation from the stack so it does not interfere with the other processed operations.
 					}
 					break;
 				case 0:
-					System.out.println("\nSaliendo del programa...");
+					System.out.println("\nExiting program...");
 					break;
 				default:
-					System.out.println("\nERROR! Opcion invalida");
+					System.out.println("\nERROR! Invalid option");
 					break;
 			}
-		} while (opcion != 0);
+		} while (option != 0);
 		
 		input.close();
 	}
